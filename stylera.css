@@ -1,0 +1,80 @@
+.tabuleiro{
+    width: 600px;
+    height: 600px;
+    font-family: 'Julius Sans One', sans-serif;
+}
+body{
+    background-image: url('fundo.jpg');
+    background-size: auto;
+    background-repeat: no-repeat;
+
+}
+.titulo{
+    text-align: center;
+}
+h3{
+    font-family: 'Permanent Marker', cursive;
+    font-size:70px;
+    text-shadow: -2px 7px 30px rgba(150, 150, 150, 1);
+}
+#resetar{
+    background-color: rgba(231, 76, 60,1.0);
+    font-size: 20px;
+    color: rgba(189, 195, 199,1.0);
+    font-family: 'Indie Flower', cursive;
+    font-weight: bold;
+}
+#resolver{
+    background-color: rgba(39, 174, 96,1.0);
+    font-size: 20px;
+    color: rgba(189, 195, 199,1.0);
+    font-family: 'Indie Flower', cursive;
+    font-weight: bold;
+}
+#iniciar{
+    background-color: rgba(41, 128, 185,1.0);
+    font-size: 20px;
+    color:rgba(189, 195, 199,1.0);
+    font-family: 'Indie Flower', cursive;
+    font-weight: bold;
+
+}
+button{
+    margin-top: 5px;
+
+}
+#container{
+    position: relative;
+    margin: 50px auto;
+    background-color: rgba(149, 165, 166,1.0);
+    border-radius: 25px;
+    box-shadow: 4px 4px 20px rgb(42, 42, 42);
+}
+.peca{
+    width: 190px;
+    height: 190px;
+    position: absolute;
+    background-color: rgba(52, 73, 94,1.0);
+    border-radius: 25px;
+    margin: 5px;
+    font-size: 130px;
+    padding-left: 59px;
+    transition: left .5s, top .5s;
+    color: rgba(189, 195, 199,1.0);
+}
+#n1{
+    padding-left: 75px;
+}
+
+.peca:hover{
+    border-color: rgba(39, 174, 96,1.0);
+    border-width: 3px;
+    border-style: dashed;
+}
+.rodape h2{
+    margin-top: 5px;
+    text-align: center;
+    font-size: 25px;
+    color: white;
+    font-family: 'Indie Flower', cursive;
+}

@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="pt">
+    <head>
+        <title>Quebra cabeça</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" href="stylera.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <link href="https://fonts.googleapis.com/css?family=Indie+Flower" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Permanent+Marker" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Julius+Sans+One" rel="stylesheet">
+    </head>
+    <body>
+<div class="game" id="game">
+    <div class="titulo">
+        <h3>Quebra cabeça</h3>
+    </div>
+    <div id="container" class="tabuleiro">
+        <div id="n1" onclick="mover('n1')" class="peca" data-value="1"></div>
+        <div id="n2" onclick="mover('n2')"  class="peca" data-value="2"></div>
+        <div id="n3" onclick="mover('n3')" class="peca" data-value="3"></div>
+        <div id="n4" onclick="mover('n4')" class="peca" data-value="4"></div>
+        <div id="n5" onclick="mover('n5')" class="peca" data-value="5"></div>
+        <div id="n6" onclick="mover('n6')" class="peca" data-value="6"></div>
+        <div id="n7" onclick="mover('n7')" class="peca" data-value="7"></div>
+        <div id="n8" onclick="mover('n8')" class="peca" data-value="8"></div>
+        <div id="n0" data-value="0"></div>
+    </div>
+
+        <button id="iniciar" onclick="startGame()" type="button" name="button" class="btn btn-primary col-md-2 col-md-offset-5">Iniciar</button>
+        <button id="resetar" onclick="startGame()" type="button" name="button" class="btn btn-primary col-md-2 col-md-offset-5">Resetar</button>
+        <button id="resolver" onclick="resolver()" type="button" name="button" class="btn btn-success col-md-2 col-md-offset-5">Resolver Quebra-cabeça</button>
+
+        <!-- <button id="undo" onclick="undo()" type="button" name="button" class="btn btn-warning col-md-2 col-md-offset-5">Voltar Jogadas</button> -->
+
+
+
+    </div>
+    <div class="rodape col-md-4 col-md-offset-4">
+        <br>
+        <br>
+        <br>
+        <h2><span class="glyphicon glyphicon-education"></span>  ADS-Casca 2017</h2>
+        <h2>Criado por: Luigi Vivian</h2>
+    </div>
+    <!--fim div game  -->
+    </body>
+
+
+    <script>
+    $(document).ready(function(){
+        carregar();
+        $('#resetar').hide();
+        $('#resolver').hide();
+    });
+    //array que armazena o estado do jogo
+    var iniciar = false;
+    var pecas = [
+        [document.querySelector("#n1"), document.querySelector("#n2"), document.querySelector("#n3")],
+        [document.querySelector("#n4"), document.querySelector("#n5"), document.querySelector("#n6")],
+        [document.querySelector("#n7"), document.querySelector("#n8"), document.querySelector("#n0")],
+];
+
+var final = [
+    [document.querySelector("#n1"), document.querySelector("#n2"), document.querySelector("#n3")],
+    [document.querySelector("#n4"), document.querySelector("#n5"), document.querySelector("#n6")],
+    [document.querySelector("#n7"), document.querySelector("#n8"), document.querySelector("#n0")],
+];
+
+    //tela de start game
+    //função que inicializa os elementos do jogo
+    function carregar(){
+        //inserindo elementos na matriz e setando texto nas peças
+        var ii = 1;
+        for(var l = 0; l < 3; l++){
+            for (var c = 0; c < 3; c++) {
+                var peca = document.querySelector("#n"+ii);
+                console.log(peca);
+                $('#n'+ii).text(''+ii);
+                pecas[l][c] = peca;
+                fim = pecas[l][c];
+                ii++;
+            }
+
+        }
+        pecas[2][2] = document.querySelector("#n0");
+        //completa a matriz com um espaço em branco (#n0), depois organiza tabuleiro
+        organizar();
+    }
+ii = 0;
+    function organizar(){ //Organizar peças no tabuleiro.
+        for (var l = 0; l < 3; l++) {
+            for (var c = 0; c < 3; c++) {
+                var peca = pecas[l][c];
+                var id = $(peca).prop("id");
+                //Posicionando peças conforme sua linha e coluna na matriz
+                if(peca){
+                    ii++;
+                    if(l == 0){ //linha 0
+                        $('#'+id).css('top', '2px')
+                    } else
+                    if(l == 1){//linha 1
+                        $('#'+id).css('top', '200px')
+                    } else {//linha 2
+                        $('#'+id).css('top', '400px')
+                    }
+                    if(c == 0){//coluna 0
+                        $('#'+id).css('left', '2px')
+                    } else
+                    if(c == 1){//coluna 1
+                        $('#'+id).css('left', '200px')
+                    } else {//coluna 2
+                        $('#'+id).css('left', '400px')
+                    }
+                }
+            }
+    }
+}
+                //left 0,200,400 top 2px = primeira linha
+                //left 0,200,400 top 200px = primeira linha
+                //left 0,200,400 top 400px = primeira linha
+
+//pilhas/filas
+var zeroX = [];
+var zeroY = [];
+var jogadasX = [];
+var jogadasY = [];
+var jogadasIDS = [];
+    function mover(id){
+        if(iniciar == false){
+            alert('Inicie o jogo !');
+            return;
+        }
+        var busca = id;
+        var x;
+        var y;
+YYY: for (var i = 0; i < 3; i++){//achando id na matriz coordenada y
+         for (var j = 0; j < 3; j++){
+             var peca = pecas[i][j];
+             var id = $(peca).prop("id");
+             console.log(id);
+             if (busca === id){
+                 y = i;
+                break YYY;
+             }
+
+         }
+}
+console.log("y="+y);
+    XXX: for (var i = 0; i < 3; i++){//achando id na matriz coordenada y
+             for (var j = 0; j < 3; j++){
+                 var peca = pecas[i][j];
+                 var id = $(peca).prop("id");
+                 if (busca === id){
+                     x = j;
+                    break XXX;
+                 }
+
+             }
+    }
+console.log("x="+x);
+console.log("idid="+id)
+                //y = linha
+                //x = coluna
+                if(y == 0){// verificando linha 0
+                    if(pecas[y][x + 1] == document.querySelector("#n0")){
+                        console.log("coluna + 1 livre");
+                        pecas[y][x + 1] = document.querySelector("#"+id);
+                        pecas[y][x] = document.querySelector("#n0");
+                        zeroX.push(x);//armezenando as jogadas
+                        zeroY.push(y);
+                        jogadasX.push(x + 1);
+                        jogadasY.push(y);
+                        jogadasIDS.push('#'+id);
+                    }
+                    if(pecas[y][x - 1] == document.querySelector("#n0")){
+                        console.log("coluna - 1 livre");
+                        pecas[y][x - 1] = document.querySelector("#"+id);
+                        pecas[y][x] = document.querySelector("#n0");
+                        zeroX.push(x);//armezenando as jogadas
+                        zeroY.push(y);
+                        jogadasX.push(x - 1);
+                        jogadasY.push(y);
+                        jogadasIDS.push('#'+id);
+                    }
+                    if(pecas[y + 1][x] == document.querySelector("#n0")){
+                        pecas[y + 1][x] = document.querySelector("#"+id);
+                        pecas[y][x] = document.querySelector("#n0");
+                        zeroX.push(x);//armezenando as jogadas
+                        zeroY.push(y);
+                        jogadasX.push(x);
+                        jogadasY.push(y + 1);
+                        jogadasIDS.push('#'+id);
+                    }
+                }
+                if(y == 1){// verificando linha 0
+                    if(pecas[y][x + 1] == document.querySelector("#n0")){
+                        console.log("x + 1 livre");
+                        pecas[y][x + 1] = document.querySelector("#"+id);
+                        pecas[y][x] = document.querySelector("#n0");
+                        zeroX.push(x);//armezenando as jogadas
+                        zeroY.push(y);
+                        jogadasX.push(x + 1);
+                        jogadasY.push(y);
+                        jogadasIDS.push('#'+id);
+                    }
+                    if(pecas[y][x - 1] == document.querySelector("#n0")){
+                        console.log("x - 1 livre");
+                        pecas[y][x - 1] = document.querySelector("#"+id);;
+                        pecas[y][x] = document.querySelector("#n0");
+                        zeroX.push(x);//armezenando as jogadas
+                        zeroY.push(y);
+                        jogadasX.push(x - 1);
+                        jogadasY.push(y);
+                        jogadasIDS.push('#'+id);
+                    }
+                    if(pecas[y + 1][x] == document.querySelector("#n0")){
+                        console.log("y + 1 livre");
+                        pecas[y + 1][x] = document.querySelector("#"+id);
+                        pecas[y][x] = document.querySelector("#n0");
+                        zeroX.push(x);//armezenando as jogadas
+                        zeroY.push(y);
+                        jogadasX.push(x);
+                        jogadasY.push(y + 1);
+                        jogadasIDS.push('#'+id);
+                    }
+                    if(pecas[y - 1][x] == document.querySelector("#n0")){
+                        console.log("y - 1 livre");
+                        pecas[y - 1][x] = document.querySelector("#"+id);
+                        pecas[y][x] = document.querySelector("#n0");
+                        zeroX.push(x);//armezenando as jogadas
+                        zeroY.push(y);
+                        jogadasX.push(x);
+                        jogadasY.push(y - 1);
+                        jogadasIDS.push('#'+id);
+                    }
+                }
+                if(y == 2){// verificando linha 0
+                    if(pecas[y][x + 1] == document.querySelector("#n0")){
+                        pecas[y][x + 1] = document.querySelector("#"+id);
+                        pecas[y][x] = document.querySelector("#n0");
+                        zeroX.push(x);//armezenando as jogadas
+                        zeroY.push(y);
+                        jogadasX.push(x + 1);
+                        jogadasY.push(y);
+                        jogadasIDS.push('#'+id);
+                    }
+                    if(pecas[y][x - 1] == document.querySelector("#n0")){
+                        pecas[y][x - 1] = document.querySelector("#"+id);
+                        pecas[y][x] = document.querySelector("#n0");
+                        zeroX.push(x);//armezenando as jogadas
+                        zeroY.push(y);
+                        jogadasX.push(x - 1);
+                        jogadasY.push(y);
+                        jogadasIDS.push('#'+id);
+                    }
+                    if(pecas[y - 1][x] == document.querySelector("#n0")){
+                        pecas[y - 1][x] = document.querySelector("#"+id);
+                        pecas[y][x] = document.querySelector("#n0");
+                        zeroX.push(x);//armezenando as jogadas
+                        zeroY.push(y);
+                        jogadasX.push(x);
+                        jogadasY.push(y - 1);
+                        jogadasIDS.push('#'+id);
+                    }
+                }
+
+                if(check()){//chamada do metodo para verificar se há vitoria
+                    alert("parabéns voce venceu");
+                    $('#resolver').hide();
+                    iniciar = false;
+                }
+                organizar();
+    }
+    function check(){ //metodo para verificar se há vitoria
+        for (var i = 0; i < 3; i++) {
+            for (var j = 0; j < 3; j++) {
+                var a = pecas[i][j];
+                var b = final[i][j];
+                if(a !== b){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    function undo(){//voltar jogadas, metodo utilizado para o algoritmo nao se perder na resolução
+        var idss =jogadasIDS.pop();
+        if(idss == null){
+            return;
+        }else{
+            var x,y;
+            x = zeroX.pop();
+            y = zeroY.pop();
+            pecas[y][x] = document.querySelector(idss);
+
+            x = jogadasX.pop();
+            y = jogadasY.pop();
+            pecas[y][x] = document.querySelector("#n0");
+            organizar();
+        }
+    }
+
+    var backID;
+    var backX;
+    var backY;
+    var backZeroX;
+    var backZeroY;
+    //jogos previamente criados
+    var g1 = [];
+    var g2 = [];
+    var g3 = [];
+    var g4 = [];
+    var g5 = [];
+    var g6 = [];
+    var g7 = [];
+    var g8 = [];
+    var g9 = [];
+    var g10 = [];
+    var g11 = [];
+    var g12 = [];
+    var g13 = [];
+    var g14 = [];
+    var g15 = [];
+    function getGame(){
+        //Cada jogo é previamente criado, junto com sua solução armazenadas em uma fila.
+        var jogos = [];
+        jogos.push(g1);
+        jogos.push(g2);
+        jogos.push(g3);
+        jogos.push(g4);
+        jogos.push(g5);
+        jogos.push(g6);
+        jogos.push(g7);
+        jogos.push(g8);
+        jogos.push(g9);
+        jogos.push(g10);
+        jogos.push(g11);
+        jogos.push(g12);
+        jogos.push(g13);
+        jogos.push(g14);
+        jogos.push(g15);
+        jogos.sort(function(a, b){return 0.5 - Math.random()})// sorteando numero aleatorio
+        if(jogos[0] == g1){// Criando jogo 1, g 1 = game 1
+            //Posicao das peças embaralhadas jogo 1
+            g1 = [
+                [document.querySelector("#n0"), document.querySelector("#n1"), document.querySelector("#n3")],
+                [document.querySelector("#n4"), document.querySelector("#n8"), document.querySelector("#n5")],
+                [document.querySelector("#n2"), document.querySelector("#n7"), document.querySelector("#n6")]
+                ];
+            //id das peças a serem movimentadas para resolver o jogo
+            backID = ['#n4','#n2','#n7','#n8','#n2','#n4','#n1','#n2','#n5','#n6'];
+            //coordenadas da matriz quais o zero ia ser setado, armazenadas em fila
+            backY = [1,2,2,1,1,0,0,1,1,2];
+            backX = [0,0,1,1,0,0,1,1,2,2];
+            //posições da matriz quais as peças irao na resolução (ids backID) armazenadas em fila
+            backZeroY = [0,1,2,2,1,1,0,0,1,1];
+            backZeroX = [0,0,0,1,1,0,0,1,1,2];
+            return g1; //retorna o jogo
+        }else if(jogos[0] == g2){//Criando jogo 2
+            g2 = [
+                //Y
+                //O
+                [document.querySelector("#n1"), document.querySelector("#n3"), document.querySelector("#n5")],
+                //1
+                [document.querySelector("#n4"), document.querySelector("#n8"), document.querySelector("#n0")],
+                //2
+                [document.querySelector("#n2"), document.querySelector("#n7"), document.querySelector("#n6")]
+                /////x/////    0    /////////////////////    1    /////////////////////    2    ///////////
+                        ];
+            backID = ['#n5','#n3','#n1','#n4','#n2', '#n7', '#n8', '#n2', '#n4', '#n1', '#n2', '#n5','#n6'];
+            backY = [0,0,0,1, 2, 2, 1, 1, 0, 0, 1, 1,2];
+            backX = [2,1,0,0, 0, 1, 1, 0, 0, 1, 1, 2,2];
+            backZeroY = [1,0,0,0, 1, 2, 2, 1, 1, 0, 0, 1,1];
+            backZeroX = [2,2,1,0, 0, 0, 1, 1, 0, 0, 1, 1,2];
+            return g2;
+        }else if(jogos[0] == g3){//Criando jogo 3
+            g3 = [
+                //Y
+                //O
+                [document.querySelector("#n1"), document.querySelector("#n3"), document.querySelector("#n5")],
+                //1
+                [document.querySelector("#n4"), document.querySelector("#n8"), document.querySelector("#n6")],
+                //2
+                [document.querySelector("#n0"), document.querySelector("#n2"), document.querySelector("#n7")]
+                /////x/////    0    /////////////////////    1    /////////////////////    2    ///////////
+                        ];
+            backID = ['#n2','#n7','#n6','#n5','#n3','#n1','#n4','#n2', '#n7', '#n8', '#n2', '#n4', '#n1', '#n2', '#n5','#n6'];
+            backY = [2,2,1,0,0,0,1, 2, 2, 1, 1, 0, 0, 1, 1,2];
+            backX = [1,2,2,2,1,0,0, 0, 1, 1, 0, 0, 1, 1, 2,2];
+            backZeroY = [2,2,2,1,0,0,0, 1, 2, 2, 1, 1, 0, 0, 1,1];
+            backZeroX = [0,1,2,2,2,1,0, 0, 0, 1, 1, 0, 0, 1, 1,2];
+            return g3;
+        }else if(jogos[0] == g4){
+
+                g4 = [
+                    //Y
+                    //O
+                    [document.querySelector("#n0"), document.querySelector("#n3"), document.querySelector("#n5")],
+                    //1
+                    [document.querySelector("#n1"), document.querySelector("#n8"), document.querySelector("#n6")],
+                    //2
+                    [document.querySelector("#n4"), document.querySelector("#n2"), document.querySelector("#n7")]
+                    /////x/////    0    /////////////////////    1    /////////////////////    2    ///////////
+                            ];
+                backID = ['#n1','#n4','#n2','#n7','#n6','#n5','#n3','#n1','#n4','#n2', '#n7', '#n8', '#n2', '#n4', '#n1', '#n2', '#n5','#n6'];
+                backY = [1,2,2,2,1,0,0,0,1, 2, 2, 1, 1, 0, 0, 1, 1,2];
+                backX = [0,0,1,2,2,2,1,0,0, 0, 1, 1, 0, 0, 1, 1, 2,2];
+                backZeroY = [0,1,2,2,2,1,0,0,0, 1, 2, 2, 1, 1, 0, 0, 1,1];
+                backZeroX = [0,0,0,1,2,2,2,1,0, 0, 0, 1, 1, 0, 0, 1, 1,2];
+                return g4;
+        }else if(jogos[0] == g5){
+                g5 = [
+                    //Y
+                    //O
+                    [document.querySelector("#n3"), document.querySelector("#n8"), document.querySelector("#n5")],
+                    //1
+                    [document.querySelector("#n1"), document.querySelector("#n0"), document.querySelector("#n6")],
+                    //2
+                    [document.querySelector("#n4"), document.querySelector("#n2"), document.querySelector("#n7")]
+                    /////x/////    0    /////////////////////    1    /////////////////////    2    ///////////
+                            ];
+                backID = ['#n8','#n3','#n1','#n4','#n2','#n7','#n6','#n5','#n3','#n1','#n4','#n2', '#n7', '#n8', '#n2', '#n4', '#n1', '#n2', '#n5','#n6'];
+                console.log("backIDSize="+backID.length);
+                backY = [0,0,1,2,2,2,1,0,0,0,1, 2, 2, 1, 1, 0, 0, 1, 1,2];
+                backX = [1,0,0,0,1,2,2,2,1,0,0, 0, 1, 1, 0, 0, 1, 1, 2,2];
+                backZeroY = [1,0,0,1,2,2,2,1,0,0,0, 1, 2, 2, 1, 1, 0, 0, 1,1];
+                backZeroX = [1,1,0,0,0,1,2,2,2,1,0, 0, 0, 1, 1, 0, 0, 1, 1,2];
+                return g5;
+        }else if(jogos[0] == g6){
+                g6 = [
+                    //Y
+                    //O
+                    [document.querySelector("#n8"), document.querySelector("#n5"), document.querySelector("#n0")],
+                    //1
+                    [document.querySelector("#n3"), document.querySelector("#n1"), document.querySelector("#n6")],
+                    //2
+                    [document.querySelector("#n4"), document.querySelector("#n2"), document.querySelector("#n7")]
+                    /////x/////    0    /////////////////////    1    /////////////////////    2    ///////////
+                            ];
+                backID = ['#n5','#n8','#n3','#n1','#n8','#n3','#n1','#n4','#n2','#n7','#n6','#n5','#n3','#n1','#n4','#n2', '#n7', '#n8', '#n2', '#n4', '#n1', '#n2', '#n5','#n6'];
+                backY = [0,0,1,1,0,0,1,2,2,2,1,0,0,0,1, 2, 2, 1, 1, 0, 0, 1, 1,2];
+                backX = [1,0,0,1,1,0,0,0,1,2,2,2,1,0,0, 0, 1, 1, 0, 0, 1, 1, 2,2];
+                backZeroY = [0,0,0,1,1,0,0,1,2,2,2,1,0,0,0, 1, 2, 2, 1, 1, 0, 0, 1,1];
+                backZeroX = [2,1,0,0,1,1,0,0,0,1,2,2,2,1,0, 0, 0, 1, 1, 0, 0, 1, 1,2];
+                return g6;
+        }else if(jogos[0] == g7){
+                g7 = [
+                    //Y
+                    //O
+                    [document.querySelector("#n8"), document.querySelector("#n5"), document.querySelector("#n6")],
+                    //1
+                    [document.querySelector("#n3"), document.querySelector("#n2"), document.querySelector("#n0")],
+                    //2
+                    [document.querySelector("#n4"), document.querySelector("#n7"), document.querySelector("#n1")]
+                    /////x/////    0    /////////////////////    1    /////////////////////    2    ///////////
+                            ];
+                backID = ['#n1','#n7','#n2','#n1','#n6','#n5','#n8','#n3','#n1','#n8','#n3','#n1','#n4','#n2','#n7','#n6','#n5','#n3','#n1','#n4','#n2', '#n7', '#n8', '#n2', '#n4', '#n1', '#n2', '#n5','#n6'];
+                backY = [2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0,1, 2, 2, 1, 1, 0, 0, 1, 1,2];
+                backX = [2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0,0, 0, 1, 1, 0, 0, 1, 1, 2,2];
+                backZeroY = [1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0, 1, 2, 2, 1, 1, 0, 0, 1,1];
+                backZeroX = [2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0, 0, 0, 1, 1, 0, 0, 1, 1,2];
+                return g7;
+        }else if(jogos[0] == g8){
+                g8 = [
+                    //Y
+                    //O
+                    [document.querySelector("#n0"), document.querySelector("#n5"), document.querySelector("#n6")],
+                    //1
+                    [document.querySelector("#n8"), document.querySelector("#n7"), document.querySelector("#n2")],
+                    //2
+                    [document.querySelector("#n3"), document.querySelector("#n4"), document.querySelector("#n1")]
+                    /////x/////    0    /////////////////////    1    /////////////////////    2    ///////////
+                            ];
+                backID = ['#n8','#n3','#n4','#n7','#n2','#n1','#n7','#n2','#n1','#n6','#n5','#n8','#n3','#n1','#n8','#n3','#n1','#n4','#n2','#n7','#n6','#n5','#n3','#n1','#n4','#n2', '#n7', '#n8', '#n2', '#n4', '#n1', '#n2', '#n5','#n6'];
+                //fila vai para   /
+                console.log("backIDSize="+backID.length);
+                backY = [1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0,1, 2, 2, 1, 1, 0, 0, 1, 1,2];
+                backX = [0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0,0, 0, 1, 1, 0, 0, 1, 1, 2,2];
+                console.log("back  X="+backX.length);
+                //Zero vai para ...
+                backZeroY = [0,1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0, 1, 2, 2, 1, 1, 0, 0, 1,1];
+                backZeroX = [0,0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0, 0, 0, 1, 1, 0, 0, 1, 1,2];
+                return g8;
+        }else if(jogos[0] == g9){
+                g9 = [
+                    //Y
+                    //O
+                    [document.querySelector("#n0"), document.querySelector("#n7"), document.querySelector("#n6")],
+                    //1
+                    [document.querySelector("#n5"), document.querySelector("#n8"), document.querySelector("#n2")],
+                    //2
+                    [document.querySelector("#n3"), document.querySelector("#n4"), document.querySelector("#n1")]
+                    /////x/////    0    /////////////////////    1    /////////////////////    2    ///////////
+                            ];
+                backID = ['#n5','#n8','#n7','#n5','#n8','#n3','#n4','#n7','#n2','#n1','#n7','#n2','#n1','#n6','#n5','#n8','#n3','#n1','#n8','#n3','#n1','#n4','#n2','#n7','#n6','#n5','#n3','#n1','#n4','#n2', '#n7', '#n8', '#n2', '#n4', '#n1', '#n2', '#n5','#n6'];
+                console.log("backIDSize="+backID.length);
+                backY = [1,1,0,0,1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0,1, 2, 2, 1, 1, 0, 0, 1, 1,2];
+                backX = [0,1,1,0,0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0,0, 0, 1, 1, 0, 0, 1, 1, 2,2];
+                console.log("back  X="+backX.length);
+                //Zero vai para ...
+                backZeroY = [0,1,1,0,0,1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0, 1, 2, 2, 1, 1, 0, 0, 1,1];
+                backZeroX = [0,0,1,1,0,0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0, 0, 0, 1, 1, 0, 0, 1, 1,2];
+                return g9;
+        }else if(jogos[0] == g10){
+                g10 = [
+                    //Y
+                    //O
+                    [document.querySelector("#n7"), document.querySelector("#n8"), document.querySelector("#n6")],
+                    //1
+                    [document.querySelector("#n3"), document.querySelector("#n5"), document.querySelector("#n2")],
+                    //2
+                    [document.querySelector("#n4"), document.querySelector("#n1"), document.querySelector("#n0")]
+                    /////x/////    0    /////////////////////    1    /////////////////////    2    ///////////
+                            ];
+                            //0
+                //game 3 inicia n1
+                backID = ['#n1','#n4','#n3','#n5','#n8','#n7','#n5','#n8','#n7','#n5','#n8','#n3','#n4','#n7','#n2','#n1','#n7','#n2','#n1','#n6','#n5','#n8','#n3','#n1','#n8','#n3','#n1','#n4','#n2','#n7','#n6','#n5','#n3','#n1','#n4','#n2', '#n7', '#n8', '#n2', '#n4', '#n1', '#n2', '#n5','#n6'];
+                console.log("backIDSize="+backID.length);
+                backY = [2,2,1,1,0,0,1,1,0,0,1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0,1, 2, 2, 1, 1, 0, 0, 1, 1,2];
+                backX = [1,0,0,1,1,0,0,1,1,0,0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0,0, 0, 1, 1, 0, 0, 1, 1, 2,2];
+                console.log("back  X="+backX.length);
+                //Zero vai para ...
+                backZeroY = [2,2,2,1,1,0,0,1,1,0,0,1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0, 1, 2, 2, 1, 1, 0, 0, 1,1];
+                backZeroX = [2,1,0,0,1,1,0,0,1,1,0,0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0, 0, 0, 1, 1, 0, 0, 1, 1,2];
+                return g10;
+        }else if(jogos[0] == g11){
+                g11 = [
+                    //Y
+                    //O
+                    [document.querySelector("#n0"), document.querySelector("#n8"), document.querySelector("#n6")],
+                    //1
+                    [document.querySelector("#n7"), document.querySelector("#n3"), document.querySelector("#n5")],
+                    //2
+                    [document.querySelector("#n4"), document.querySelector("#n1"), document.querySelector("#n2")]
+                    /////x/////    0    /////////////////////    1    /////////////////////    2    ///////////
+                            ];
+                backID = ['#n7','#n3','#n5','#n2','#n1','#n4','#n3','#n5','#n8','#n7','#n5','#n8','#n7','#n5','#n8','#n3','#n4','#n7','#n2','#n1','#n7','#n2','#n1','#n6','#n5','#n8','#n3','#n1','#n8','#n3','#n1','#n4','#n2','#n7','#n6','#n5','#n3','#n1','#n4','#n2', '#n7', '#n8', '#n2', '#n4', '#n1', '#n2', '#n5','#n6'];
+                backY = [1,1,1,2,2,2,1,1,0,0,1,1,0,0,1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0,1, 2, 2, 1, 1, 0, 0, 1, 1,2];
+                backX = [0,1,2,2,1,0,0,1,1,0,0,1,1,0,0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0,0, 0, 1, 1, 0, 0, 1, 1, 2,2];
+                backZeroY = [0,1,1,1,2,2,2,1,1,0,0,1,1,0,0,1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0, 1, 2, 2, 1, 1, 0, 0, 1,1];
+                backZeroX = [0,0,1,2,2,1,0,0,1,1,0,0,1,1,0,0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0, 0, 0, 1, 1, 0, 0, 1, 1,2];
+                return g11;
+        }else if(jogos[0] == g12){
+                g12 = [
+                    //Y
+                    //O
+                    [document.querySelector("#n8"), document.querySelector("#n3"), document.querySelector("#n6")],
+                    //1
+                    [document.querySelector("#n7"), document.querySelector("#n1"), document.querySelector("#n5")],
+                    //2
+                    [document.querySelector("#n4"), document.querySelector("#n0"), document.querySelector("#n2")]
+                    /////x/////    0    /////////////////////    1    /////////////////////    2    ///////////
+                            ];
+                backID = ['#n1','#n3','#n8','#n7','#n3','#n5','#n2','#n1','#n4','#n3','#n5','#n8','#n7','#n5','#n8','#n7','#n5','#n8','#n3','#n4','#n7','#n2','#n1','#n7','#n2','#n1','#n6','#n5','#n8','#n3','#n1','#n8','#n3','#n1','#n4','#n2','#n7','#n6','#n5','#n3','#n1','#n4','#n2', '#n7', '#n8', '#n2', '#n4', '#n1', '#n2', '#n5','#n6'];
+                console.log("backIDSize="+backID.length);
+                backY = [1,0,0,1,1,1,2,2,2,1,1,0,0,1,1,0,0,1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0,1, 2, 2, 1, 1, 0, 0, 1, 1,2];
+                backX = [1,1,0,0,1,2,2,1,0,0,1,1,0,0,1,1,0,0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0,0, 0, 1, 1, 0, 0, 1, 1, 2,2];
+                console.log("back  X="+backX.length);
+                backZeroY = [2,1,0,0,1,1,1,2,2,2,1,1,0,0,1,1,0,0,1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0, 1, 2, 2, 1, 1, 0, 0, 1,1];
+                backZeroX = [1,1,1,0,0,1,2,2,1,0,0,1,1,0,0,1,1,0,0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0, 0, 0, 1, 1, 0, 0, 1, 1,2];
+                return g12;
+        }else if(jogos[0] == g13){
+                g13 = [
+                    //Y
+                    //O
+                    [document.querySelector("#n8"), document.querySelector("#n3"), document.querySelector("#n6")],
+                    //1
+                    [document.querySelector("#n1"), document.querySelector("#n5"), document.querySelector("#n2")],
+                    //2
+                    [document.querySelector("#n7"), document.querySelector("#n4"), document.querySelector("#n0")]
+                    /////x/////    0    /////////////////////    1    /////////////////////    2    ///////////
+                            ];
+                backID = ['#n2','#n5','#n1','#n7','#n4','#n1','#n3','#n8','#n7','#n3','#n5','#n2','#n1','#n4','#n3','#n5','#n8','#n7','#n5','#n8','#n7','#n5','#n8','#n3','#n4','#n7','#n2','#n1','#n7','#n2','#n1','#n6','#n5','#n8','#n3','#n1','#n8','#n3','#n1','#n4','#n2','#n7','#n6','#n5','#n3','#n1','#n4','#n2', '#n7', '#n8', '#n2', '#n4', '#n1', '#n2', '#n5','#n6'];
+                backY = [1,1,1,2,2,1,0,0,1,1,1,2,2,2,1,1,0,0,1,1,0,0,1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0,1, 2, 2, 1, 1, 0, 0, 1, 1,2];
+                backX = [2,1,0,0,1,1,1,0,0,1,2,2,1,0,0,1,1,0,0,1,1,0,0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0,0, 0, 1, 1, 0, 0, 1, 1, 2,2];
+                backZeroY = [2,1,1,1,2,2,1,0,0,1,1,1,2,2,2,1,1,0,0,1,1,0,0,1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0, 1, 2, 2, 1, 1, 0, 0, 1,1];
+                backZeroX = [2,2,1,0,0,1,1,1,0,0,1,2,2,1,0,0,1,1,0,0,1,1,0,0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0, 0, 0, 1, 1, 0, 0, 1, 1,2];
+                return g13;
+        }else if(jogos[0] == g14){
+                g14 = [
+                    //Y
+                    //O
+                    [document.querySelector("#n8"), document.querySelector("#n3"), document.querySelector("#n6")],
+                    //1
+                    [document.querySelector("#n0"), document.querySelector("#n5"), document.querySelector("#n2")],
+                    //2
+                    [document.querySelector("#n1"), document.querySelector("#n7"), document.querySelector("#n4")]
+                    /////x/////    0    /////////////////////    1    /////////////////////    2    ///////////
+                            ];
+                backID = ['#n1','#n7','#n4','#n2','#n5','#n1','#n7','#n4','#n1','#n3','#n8','#n7','#n3','#n5','#n2','#n1','#n4','#n3','#n5','#n8','#n7','#n5','#n8','#n7','#n5','#n8','#n3','#n4','#n7','#n2','#n1','#n7','#n2','#n1','#n6','#n5','#n8','#n3','#n1','#n8','#n3','#n1','#n4','#n2','#n7','#n6','#n5','#n3','#n1','#n4','#n2', '#n7', '#n8', '#n2', '#n4', '#n1', '#n2', '#n5','#n6'];
+                backY = [2,2,2,1,1,1,2,2,1,0,0,1,1,1,2,2,2,1,1,0,0,1,1,0,0,1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0,1, 2, 2, 1, 1, 0, 0, 1, 1,2];
+                backX = [0,1,2,2,1,0,0,1,1,1,0,0,1,2,2,1,0,0,1,1,0,0,1,1,0,0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0,0, 0, 1, 1, 0, 0, 1, 1, 2,2];
+                backZeroY = [1,2,2,2,1,1,1,2,2,1,0,0,1,1,1,2,2,2,1,1,0,0,1,1,0,0,1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0, 1, 2, 2, 1, 1, 0, 0, 1,1];
+                backZeroX = [0,0,1,2,2,1,0,0,1,1,1,0,0,1,2,2,1,0,0,1,1,0,0,1,1,0,0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0, 0, 0, 1, 1, 0, 0, 1, 1,2];
+                return g14;
+        }else if(jogos[0] == g15){
+            g15 = [
+                //Y
+                //O
+                [document.querySelector("#n8"), document.querySelector("#n6"), document.querySelector("#n0")],
+                //1
+                [document.querySelector("#n5"), document.querySelector("#n3"), document.querySelector("#n2")],
+                //2
+                [document.querySelector("#n1"), document.querySelector("#n7"), document.querySelector("#n4")]
+                /////x/////    0    /////////////////////    1    /////////////////////    2    ///////////
+                        ];
+            backID = ['#n6','#n3','#n5','#n1','#n7','#n4','#n2','#n5','#n1','#n7','#n4','#n1','#n3','#n8','#n7','#n3','#n5','#n2','#n1','#n4','#n3','#n5','#n8','#n7','#n5','#n8','#n7','#n5','#n8','#n3','#n4','#n7','#n2','#n1','#n7','#n2','#n1','#n6','#n5','#n8','#n3','#n1','#n8','#n3','#n1','#n4','#n2','#n7','#n6','#n5','#n3','#n1','#n4','#n2', '#n7', '#n8', '#n2', '#n4', '#n1', '#n2', '#n5','#n6'];
+            backY = [0,1,1,2,2,2,1,1,1,2,2,1,0,0,1,1,1,2,2,2,1,1,0,0,1,1,0,0,1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0,1, 2, 2, 1, 1, 0, 0, 1, 1,2];
+            backX = [1,1,0,0,1,2,2,1,0,0,1,1,1,0,0,1,2,2,1,0,0,1,1,0,0,1,1,0,0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0,0, 0, 1, 1, 0, 0, 1, 1, 2,2];
+            backZeroY = [0,0,1,1,2,2,2,1,1,1,2,2,1,0,0,1,1,1,2,2,2,1,1,0,0,1,1,0,0,1,2,2,1,1,2,2,1,1,0,0,0,1,1,0,0,1,2,2,2,1,0,0,0, 1, 2, 2, 1, 1, 0, 0, 1,1];
+            backZeroX = [2,1,1,0,0,1,2,2,1,0,0,1,1,1,0,0,1,2,2,1,0,0,1,1,0,0,1,1,0,0,0,1,1,2,2,1,1,2,2,1,0,0,1,1,0,0,0,1,2,2,2,1,0, 0, 0, 1, 1, 0, 0, 1, 1,2];
+            return g15;
+        }
+    }
+    function iniciarGame(){ //Iniciar jogo
+        var getJogo = getGame();    //pegando um jogo aleatorio dentre as 15 opções
+        for (var i = 0; i < 3; i++) {
+            for (var j = 0; j < 3; j++) {
+                pecas[i][j] = getJogo[i][j];
+            }
+        }
+        organizar();
+    }
+
+    var resolv = false;
+    function resolver(){ //metodo para resolver
+        if(iniciar == false){
+            alert('Inicie o jogo !');
+            return;
+        }
+        if(jogadasIDS.length != 0){ //se houver jogadas da pilha elas sao voltadas (undo) para o algoritmo nao se perder
+            undo();
+            return;
+        }
+        resolv = true;
+        console.log(backID.length);
+                   var idzao;
+                   var idzao = backID.shift();
+                   if(idzao == null){
+                       resolv = false;
+                       return;
+                   }else{//setando as peças nos conforme as soluções e a peça nula também
+                       var x,y;
+                       y = backZeroY.shift();
+                       x = backZeroX.shift();
+                       console.log('xX='+x)
+                       console.log('yY='+y)
+                       pecas[y][x] = document.querySelector(''+idzao);
+
+                       y = backY.shift();
+                       x = backX.shift();
+                       pecas[y][x] = document.querySelector('#n0');
+
+                       organizar();
+                   }
+                   if(check()){ //verificar se há vitoria
+                        alert('Parabéns "você" venceu, renicie para jogar novamente !');
+                        $('#resolver').hide();
+                        iniciar = false;
+                   }
+}
+    function startGame(){    //iniciar jogo
+        iniciar = true;
+        zeroX = [];
+        zeroY = [];
+        jogadasX = [];
+        jogadasY = [];
+        jogadasIDS = [];
+        $('#iniciar').hide();
+        $('#resetar').show();
+        $('#resolver').show();
+        iniciarGame();
+    }
+    </script>
+</html>
